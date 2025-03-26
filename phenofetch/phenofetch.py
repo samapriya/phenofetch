@@ -31,6 +31,8 @@ from .daily_links import (download_links, download_phenocam_files,
 from .site_info import site_all
 # Import site_stats functionality
 from .site_stats import site_aggregate_stats
+# Import size_estimate functionality
+from .size_estimate import fetch_size_estimate
 
 
 def valid_date(date_string):
@@ -108,25 +110,79 @@ def main():
         formatter_class=argparse.RawTextHelpFormatter,
     )
 
-    # Create subparsers for different command modes
     subparsers = parser.add_subparsers(dest="command", help="Command to execute")
 
-    # 'download' subcommand - for original functionality
-    download_parser = subparsers.add_parser(
-        "download", help="Download data from PhenoCam"
-    )
-
-    # 'stats' subcommand - for the new statistics functionality
-    stats_parser = subparsers.add_parser(
-        "stats", help="Display statistics for a PhenoCam site"
-    )
-
-    # 'sites' subcommand - for listing all available sites
     sites_parser = subparsers.add_parser(
         "sites", help="List all available PhenoCam sites"
     )
 
-    # Required arguments for download command
+    stats_parser = subparsers.add_parser(
+        "stats", help="Display statistics for a PhenoCam site"
+    )
+
+    estimate_parser = subparsers.add_parser(
+        "estimate", help="Estimate download size for a date range"
+    )
+
+    download_parser = subparsers.add_parser(
+        "download", help="Download data from PhenoCam"
+    )
+
+    required_stats = stats_parser.add_argument_group("Required arguments")
+    required_stats.add_argument(
+        "--site",
+        required=True,
+        help="NEON site code (e.g., ABBY, BART)",
+    )
+    required_stats.add_argument(
+        "--product",
+        required=True,
+        help="NEON product ID (e.g., DP1.00033)",
+    )
+
+    required_estimate = estimate_parser.add_argument_group("Required arguments")
+    required_estimate.add_argument(
+        "--site",
+        required=True,
+        help="NEON site code (e.g., ABBY, BART)",
+    )
+    required_estimate.add_argument(
+        "--product",
+        required=True,
+        help="NEON product ID (e.g., DP1.00033)",
+    )
+    required_estimate.add_argument(
+        "--start-date",
+        required=True,
+        type=valid_date,
+        help="Start date in YYYY-MM-DD format",
+    )
+    required_estimate.add_argument(
+        "--end-date",
+        required=True,
+        type=valid_date,
+        help="End date in YYYY-MM-DD format",
+    )
+
+    optional_estimate = estimate_parser.add_argument_group("Optional arguments")
+    optional_estimate.add_argument(
+        "--batch-size",
+        type=int,
+        default=50,
+        help="Number of files to process in each batch (default: 50)",
+    )
+    optional_estimate.add_argument(
+        "--concurrency",
+        type=int,
+        help="Maximum number of concurrent connections (default: auto-determined)",
+    )
+    optional_estimate.add_argument(
+        "--timeout",
+        type=int,
+        default=30,
+        help="Connection timeout in seconds (default: 30)",
+    )
+
     required_download = download_parser.add_argument_group("Required arguments")
     required_download.add_argument(
         "--site",
@@ -151,7 +207,6 @@ def main():
         help="End date in YYYY-MM-DD format",
     )
 
-    # Optional arguments for download command
     optional_download = download_parser.add_argument_group("Optional arguments")
     optional_download.add_argument(
         "--download",
@@ -182,36 +237,18 @@ def main():
         help="Connection timeout in seconds (default: 30)",
     )
 
-    # Required arguments for stats command
-    required_stats = stats_parser.add_argument_group("Required arguments")
-    required_stats.add_argument(
-        "--site",
-        required=True,
-        help="NEON site code (e.g., ABBY, BART)",
-    )
-    required_stats.add_argument(
-        "--product",
-        required=True,
-        help="NEON product ID (e.g., DP1.00033)",
-    )
-
-    # Parse arguments
     args = parser.parse_args()
 
-    # If no command is specified, show help
     if not args.command:
         parser.print_help()
         return 1
 
-    # Handle the 'sites' command
     if args.command == "sites":
         print("\nListing all available PhenoCam sites:")
         print_available_sites()
         return 0
 
-    # Handle the 'stats' command
     if args.command == "stats":
-        # Validate site code before proceeding
         site_data = get_site_data(args.site)
         if site_data is None:
             print(
@@ -223,6 +260,40 @@ def main():
         print(f"\nFetching statistics for site {args.site} (product {args.product})...")
         site_aggregate_stats(args.site, args.product)
         return 0
+
+    elif args.command == "estimate":
+        # Validate date range
+        start_date = datetime.strptime(args.start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(args.end_date, "%Y-%m-%d")
+        if start_date > end_date:
+            parser.error("Start date must be before or equal to end date")
+
+        # Validate site code before proceeding
+        site_data = get_site_data(args.site)
+        if site_data is None:
+            print(
+                f"\nError: Site code '{args.site}' not found in available sites. Please choose from the following:"
+            )
+            print_available_sites()
+            return 1
+        try:
+            # Run the size estimation
+            fetch_size_estimate(
+                site_code=args.site,
+                product_id=args.product,
+                start_date=args.start_date,
+                end_date=args.end_date,
+                batch_size=args.batch_size,
+                concurrency=args.concurrency,
+                timeout=args.timeout,
+            )
+            return 0
+        except KeyboardInterrupt:
+            print("\nOperation cancelled by user")
+            return 130
+        except Exception as e:
+            print(f"\nError: {str(e)}")
+            return 1
 
     # Handle the 'download' command (original functionality)
     elif args.command == "download":
@@ -260,7 +331,6 @@ def main():
             neon_site_identifier = f"NEON.{domain_code}.{args.site}.{args.product}"
 
             if args.download:
-                # Import required modules for downloading
                 try:
                     import colorama
 
@@ -270,10 +340,8 @@ def main():
                         "Note: For better progress bar display, consider installing colorama: pip install colorama"
                     )
 
-                # Add environment variable to ensure single-line progress bars
-                os.environ["TQDM_NCOLS"] = "100"  # Set fixed width for progress bars
+                os.environ["TQDM_NCOLS"] = "100"
 
-                # Get links with summary=False to return the list of URLs
                 print(
                     f"\nFetching links for {site_code} from {args.start_date} to {args.end_date}..."
                 )
@@ -286,10 +354,8 @@ def main():
                     file_types="all",
                 )
 
-                # Then download files with custom parameters
                 if links and len(links) > 0:
                     print(f"\nStarting download of {len(links)} files...")
-                    # Add a wrapper that could potentially fix output formatting issues
                     try:
                         result = download_phenocam_files(
                             file_urls=links,

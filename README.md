@@ -16,14 +16,18 @@ A command-line tool for downloading and analyzing PhenoCam data from NEON (Natio
     - [Setup](#setup)
   - [Usage](#usage)
     - [List Available Sites](#list-available-sites)
-    - [Download Data](#download-data)
     - [View Site Statistics](#view-site-statistics)
+    - [Estimate Download Size](#estimate-download-size)
+    - [Download Data](#download-data)
   - [Examples](#examples)
     - [List All Sites](#list-all-sites)
-    - [Download Images for a Specific Date Range](#download-images-for-a-specific-date-range)
     - [View Site Statistics Example](#view-site-statistics-example)
+    - [Estimate Download Size Example](#estimate-download-size-example)
+    - [Download Images for a Specific Date Range](#download-images-for-a-specific-date-range)
   - [License](#license)
   - [Contact](#contact)
+  - [PhenoFetch Changelog](#phenofetch-changelog)
+    - [Version 0.0.2](#version-002)
 
 ## Overview
 
@@ -36,6 +40,7 @@ This tool simplifies the process of downloading images and metadata from the Phe
 - **Site Discovery**: List all available NEON PhenoCam sites with their details
 - **Data Download**: Efficiently download PhenoCam images and metadata for specified sites and date ranges
 - **Site Statistics**: View comprehensive statistics about data availability for each site
+- **Size Estimation**: Estimate the total download size before starting a large download
 - **Asynchronous Processing**: Fast, concurrent downloading using asynchronous I/O
 - **Smart Concurrency**: Automatically adjusts download parallelism based on system resources
 - **Progress Tracking**: Clear progress bars and status updates during operations
@@ -62,11 +67,12 @@ This tool simplifies the process of downloading images and metadata from the Phe
 
 ## Usage
 
-PhenoFetch provides three main commands:
+PhenoFetch provides four main commands:
 
 - `sites`: List all available PhenoCam sites
-- `download`: Download data for a specific site and date range
 - `stats`: Display statistics for a site
+- `estimate`: Estimate download size for a date range
+- `download`: Download data for a specific site and date range
 
 ### List Available Sites
 
@@ -75,6 +81,27 @@ To see all available NEON PhenoCam sites:
 ```bash
 python phenofetch.py sites
 ```
+
+### View Site Statistics
+
+To view statistics for a specific site:
+
+```bash
+python phenofetch.py stats --site SITE_CODE --product PRODUCT_ID
+```
+
+### Estimate Download Size
+
+To estimate the download size for a specific site and date range:
+
+```bash
+python phenofetch.py estimate --site SITE_CODE --product PRODUCT_ID --start-date YYYY-MM-DD --end-date YYYY-MM-DD
+```
+
+Optional arguments:
+- `--batch-size`: Number of files to process in each batch (default: 50)
+- `--concurrency`: Maximum number of concurrent connections (default: auto-determined)
+- `--timeout`: Connection timeout in seconds (default: 30)
 
 ### Download Data
 
@@ -97,14 +124,6 @@ Optional arguments:
 - `--concurrency`: Maximum number of concurrent downloads (default: auto-determined)
 - `--timeout`: Connection timeout in seconds (default: 30)
 
-### View Site Statistics
-
-To view statistics for a specific site:
-
-```bash
-python phenofetch.py stats --site SITE_CODE --product PRODUCT_ID
-```
-
 ## Examples
 
 ### List All Sites
@@ -114,17 +133,6 @@ python phenofetch.py sites
 ```
 
 This will display a table of all available NEON PhenoCam sites, including their site codes, descriptions, domains, states, and types.
-
-### Download Images for a Specific Date Range
-
-```bash
-python phenofetch.py download --site ABBY --product DP1.00033 --start-date 2022-01-01 --end-date 2022-01-31 --download --output-dir ./my_phenocam_data
-```
-
-This will:
-1. Fetch all available PhenoCam data from the ABBY site for January 2022
-2. Download all images, thumbnails, and metadata files to the specified directory
-3. Show progress as the downloads proceed
 
 ### View Site Statistics Example
 
@@ -138,6 +146,28 @@ This will display:
 3. Year-by-year statistics
 4. Average images per month
 
+### Estimate Download Size Example
+
+```bash
+python phenofetch.py estimate --site ABBY --product DP1.00033 --start-date 2022-01-01 --end-date 2022-01-31
+```
+
+This will:
+1. Fetch all available PhenoCam data links from the ABBY site for January 2022
+2. Check the size of each file without downloading it
+3. Display a summary of the estimated total download size, broken down by file type
+4. Help you make an informed decision before starting a large download
+
+### Download Images for a Specific Date Range
+
+```bash
+python phenofetch.py download --site ABBY --product DP1.00033 --start-date 2022-01-01 --end-date 2022-01-31 --download --output-dir ./my_phenocam_data
+```
+
+This will:
+1. Fetch all available PhenoCam data from the ABBY site for January 2022
+2. Download all images, thumbnails, and metadata files to the specified directory
+3. Show progress as the downloads proceed
 
 ## License
 
@@ -149,3 +179,14 @@ For questions or feedback, please contact:
 - Samapriya Roy
 
 ---
+
+## PhenoFetch Changelog
+
+### Version 0.0.2
+- **Added**: New `estimate` command to check download size before committing to large downloads
+- **Added**: Size estimation for full-resolution images and thumbnails
+- **Added**: Detailed breakdown of file sizes by type (full-res, thumbnail, metadata)
+- **Added**: Better error handling and reporting in size estimation
+- **Updated**: Documentation to include size estimation workflow
+- **Fixed**: Progress bar display for better visibility during batch operations
+- **Improved**: Terminal output formatting with Rich library
