@@ -1,7 +1,10 @@
 # PhenoFetch
 
-A command-line tool for downloading and analyzing PhenoCam data from NEON (National Ecological Observatory Network) sites.
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/6e777aab-e4ff-480c-9128-2d115cb07f83" width="200" alt="Logo">
+</p>
 
+A command-line tool for downloading and analyzing PhenoCam data from NEON (National Ecological Observatory Network) sites. PhenoFetch is a Python-based tool designed to facilitate the retrieval and analysis of PhenoCam data from the National Ecological Observatory Network (NEON). PhenoCam data consists of time-lapse images used to monitor vegetation phenology (seasonal changes) at various ecological sites across the United States. This tool simplifies the process of downloading images and metadata from the PhenoCam web service, providing both batch download capabilities and summary statistics for data availability.
 
 **This tool is not officially affiliated with the National Ecological Observatory Network (NEON) or the PhenoCam Network.**
 
@@ -9,7 +12,6 @@ A command-line tool for downloading and analyzing PhenoCam data from NEON (Natio
 
 - [PhenoFetch](#phenofetch)
   - [Table of Contents](#table-of-contents)
-  - [Overview](#overview)
   - [Features](#features)
   - [Installation](#installation)
     - [Requirements](#requirements)
@@ -28,12 +30,6 @@ A command-line tool for downloading and analyzing PhenoCam data from NEON (Natio
   - [Contact](#contact)
   - [PhenoFetch Changelog](#phenofetch-changelog)
     - [Version 0.0.2](#version-002)
-
-## Overview
-
-PhenoFetch is a Python-based tool designed to facilitate the retrieval and analysis of PhenoCam data from the National Ecological Observatory Network (NEON). PhenoCam data consists of time-lapse images used to monitor vegetation phenology (seasonal changes) at various ecological sites across the United States.
-
-This tool simplifies the process of downloading images and metadata from the PhenoCam web service, providing both batch download capabilities and summary statistics for data availability.
 
 ## Features
 
