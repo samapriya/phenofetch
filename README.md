@@ -1,5 +1,7 @@
 # PhenoFetch
 
+[![CI phenofetch](https://github.com/samapriya/phenofetch/actions/workflows/package-ci.yml/badge.svg)](https://github.com/samapriya/phenofetch/actions/workflows/package-ci.yml)
+
 <p align="center">
   <img src="https://github.com/user-attachments/assets/6e777aab-e4ff-480c-9128-2d115cb07f83" width="200" alt="Logo">
 </p>
