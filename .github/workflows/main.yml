@@ -1,0 +1,59 @@
+name: CI phenofetch
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.11"]
+    steps:
+      - name: Checkout repository
+        continue-on-error: true
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Create whl files
+        continue-on-error: true
+        run: |
+          pip install setuptools
+          pip install wheel
+          python setup.py sdist bdist_wheel
+          cd dist
+      - name: List & install wheel files(ubuntu)
+        continue-on-error: true
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          for file in dist/*.whl; do
+            echo "Installing $file..."
+            pip install "$file"
+          done
+      - name: List & install wheel files(mac)
+        continue-on-error: true
+        if: matrix.os == 'macos-latest'
+        run: |
+          for file in dist/*.whl; do
+            echo "Installing $file..."
+            pip install "$file"
+          done
+      - name: List & install wheel files(windows)
+        continue-on-error: true
+        if: matrix.os == 'windows-latest'
+        run: |
+          foreach ($file in Get-ChildItem -Path dist -Filter *.whl) {
+            Write-Host "Installing $file..."
+            pip.exe install "$file"
+          }
+      - name: test pkg
+        run: |
+          phenofetch -h
