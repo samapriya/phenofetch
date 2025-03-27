@@ -18,11 +18,17 @@ limitations under the License.
 """
 
 import argparse
+import importlib.metadata
 import os
 import sys
 from collections import defaultdict
 from datetime import datetime
+from importlib.metadata import version
 
+import pkg_resources
+import requests
+from colorama import Fore, Style, init
+from packaging import version as pkg_version
 from rich.console import Console
 from rich.table import Table
 
@@ -33,6 +39,79 @@ from .site_info import site_all
 from .site_stats import site_aggregate_stats
 # Import size_estimate functionality
 from .size_estimate import fetch_size_estimate
+
+
+def compare_version(version1, version2):
+    """
+    Compare two version strings using the packaging.version module.
+    Returns: 1 if version1 > version2, -1 if version1 < version2, 0 if equal
+    """
+    v1 = pkg_version.parse(version1)
+    v2 = pkg_version.parse(version2)
+
+    if v1 > v2:
+        return 1
+    elif v1 < v2:
+        return -1
+    else:
+        return 0
+
+
+def get_latest_version(package):
+    """Get the latest version of a package from PyPI."""
+    try:
+        response = requests.get(f"https://pypi.org/pypi/{package}/json", timeout=5)
+        response.raise_for_status()
+        return response.json()["info"]["version"]
+    except (requests.RequestException, KeyError) as e:
+        print(f"Error fetching version for {package}: {e}")
+        return None
+
+
+def get_installed_version(package):
+    """Get the installed version of a package using importlib.metadata."""
+    try:
+        return importlib.metadata.version(package)
+    except importlib.metadata.PackageNotFoundError:
+        try:
+            # Fallback to pkg_resources
+            return pkg_resources.get_distribution(package).version
+        except pkg_resources.DistributionNotFound:
+            print(f"Package {package} is not installed")
+            return None
+
+
+def check_package_version(package_name):
+    """Check if the installed version of a package is the latest."""
+    installed_version = get_installed_version(package_name)
+    latest_version = get_latest_version(package_name)
+
+    if not installed_version or not latest_version:
+        return
+
+    result = compare_version(latest_version, installed_version)
+    border = (
+        Style.BRIGHT
+        + "========================================================================="
+    )
+
+    if result == 1:
+        print(f"\n{border}")
+        print(
+            Fore.RED + f"Current version of {package_name} is {installed_version} "
+            f"upgrade to latest version: {latest_version}" + Style.RESET_ALL
+        )
+        print(f"{border}")
+    elif result == -1:
+        print(f"\n{border}")
+        print(
+            Fore.YELLOW + f"Possibly running staging code {installed_version} "
+            f"compared to PyPI release {latest_version}" + Style.RESET_ALL
+        )
+        print(f"{border}")
+
+
+check_package_version("phenofetch")
 
 
 def valid_date(date_string):

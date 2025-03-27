@@ -21,7 +21,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="phenofetch",
-    version="0.0.2",
+    version="0.1.0",
     description="Command-line tool for downloading PhenoCam data",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -29,8 +29,12 @@ setup(
     author_email="samapriya.roy@gmail.com",
     url="https://github.com/samapriya/phenofetch",
     packages=find_packages(),
-    py_modules=["daily_links", "site_info", "site_stats"],
+    py_modules=["daily_links", "site_info", "site_stats", "size_estimate"],
     classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Topic :: Scientific/Engineering :: GIS",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
