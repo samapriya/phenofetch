@@ -7,6 +7,7 @@ site_url: https://github.com/samapriya/phenofetch
 # Repository
 repo_name: phenofetch
 repo_url: https://github.com/samapriya/phenofetch
+edit_uri: blob/main/docs/
 
 # Copyright
 copyright: "Copyright &copy; 2025 Samapriya Roy"
