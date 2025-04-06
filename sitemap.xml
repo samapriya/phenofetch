@@ -2,50 +2,54 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://github.com/samapriya/phenofetch/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/changelog/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/examples/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/faq/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/installation/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/license/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/usage/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/commands/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/commands/download/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/commands/estimate/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
+    </url>
+    <url>
+         <loc>https://github.com/samapriya/phenofetch/commands/metadata/</loc>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/commands/sites/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
     <url>
          <loc>https://github.com/samapriya/phenofetch/commands/stats/</loc>
-         <lastmod>2025-04-02</lastmod>
+         <lastmod>2025-04-06</lastmod>
     </url>
 </urlset>
