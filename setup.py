@@ -44,6 +44,7 @@ setup(
         "setuptools",
         "wheel",
         "requests",
+        "pandas",
         "beautifulsoup4",
         "aiofiles",
         "aiohttp",
