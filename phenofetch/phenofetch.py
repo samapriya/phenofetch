@@ -32,6 +32,7 @@ from packaging import version as pkg_version
 from rich.console import Console
 from rich.table import Table
 
+from .cam_meta import process_metadata
 from .daily_links import (download_links, download_phenocam_files,
                           fetch_download, get_site_data)
 from .site_info import site_all
@@ -207,6 +208,11 @@ def main():
         "download", help="Download data from PhenoCam"
     )
 
+    # New metadata parser
+    metadata_parser = subparsers.add_parser(
+        "metadata", help="Process metadata files from downloaded PhenoCam data"
+    )
+
     required_stats = stats_parser.add_argument_group("Required arguments")
     required_stats.add_argument(
         "--site",
@@ -316,6 +322,30 @@ def main():
         help="Connection timeout in seconds (default: 30)",
     )
 
+    # Add arguments for the metadata command
+    required_metadata = metadata_parser.add_argument_group("Required arguments")
+    required_metadata.add_argument(
+        "--input-dir",
+        required=True,
+        help="Input directory containing metadata files or a single metadata file",
+    )
+
+    optional_metadata = metadata_parser.add_argument_group("Optional arguments")
+    optional_metadata.add_argument(
+        "--output-meta",
+        help="Output file path for metadata (with or without extension)",
+    )
+    optional_metadata.add_argument(
+        "--format",
+        choices=["csv", "json", "parquet", "all"],
+        help="Output format (csv, json, parquet, or all). If not specified, derived from output path extension.",
+    )
+    optional_metadata.add_argument(
+        "--pattern",
+        default=".meta",
+        help="File pattern to match when processing directories (default: '.meta')",
+    )
+
     args = parser.parse_args()
 
     if not args.command:
@@ -372,6 +402,23 @@ def main():
             return 130
         except Exception as e:
             print(f"\nError: {str(e)}")
+            return 1
+
+    # New command for metadata processing
+    elif args.command == "metadata":
+        try:
+            print(f"\nProcessing metadata from: {args.input_dir}")
+            print(f"Output path: {args.output_meta if args.output_meta else 'extracted_metadata.csv'}")
+
+            # Call the process_metadata function from cam_meta module
+            return process_metadata(
+                input_path=args.input_dir,
+                output_path=args.output_meta,
+                output_format=args.format,
+                file_pattern=args.pattern
+            )
+        except Exception as e:
+            print(f"\nError processing metadata: {str(e)}")
             return 1
 
     # Handle the 'download' command (original functionality)

@@ -148,6 +148,7 @@ nav:
       - Stats Command: commands/stats.md
       - Estimate Command: commands/estimate.md
       - Download Command: commands/download.md
+      - Metadata Command: commands/metadata.md
   - Examples: examples.md
   - FAQ: faq.md
   - Changelog: changelog.md

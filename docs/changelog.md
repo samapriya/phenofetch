@@ -2,7 +2,23 @@
 
 This page documents the version history and notable changes to PhenoFetch.
 
-### Version 0.0.2 (Current)
+#### Version 0.2.0 (Current)
+
+Released: 2025
+
+#### Added
+
+- New metadata command to extract and process information from downloaded metadata files
+- Support for exporting metadata in multiple formats (CSV, JSON, Parquet)
+- Filename parsing to extract date, time, and site information
+- Batch processing capability for large metadata collections
+
+#### Updated
+
+- Documentation to include metadata command usage and examples
+- Command-line interface with metadata subcommand
+
+### Version 0.1.1
 
 Released: 2025
 
@@ -19,7 +35,7 @@ Released: 2025
 #### Improved
 - Terminal output formatting with Rich library
 
-### Version 0.0.1 (Initial Release)
+### Version 0.1.0 (Initial Release)
 
 Released: 2025
 

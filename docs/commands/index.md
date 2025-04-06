@@ -10,6 +10,7 @@ PhenoFetch provides several commands to help you work with PhenoCam data. Each c
 | [`stats`](stats.md) | Display statistics for a specific PhenoCam site |
 | [`estimate`](estimate.md) | Estimate download size for a date range |
 | [`download`](download.md) | Download data for a specific site and date range |
+| [`metadata`](metadata.md) | Process metadata files from downloaded PhenoCam data |
 
 ## Getting Help
 
@@ -44,5 +45,6 @@ The commands are designed to be used in a logical flow:
 2. Use `stats` to understand what data is available for a site
 3. Use `estimate` to check how large a download would be
 4. Use `download` to retrieve the data
+5. Use `metadata` to process and analyze the downloaded metadata files
 
 Each command page in this section provides detailed information on usage, options, and examples.
