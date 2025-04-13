@@ -21,7 +21,7 @@ from setuptools import find_packages, setup
 
 setup(
     name="phenofetch",
-    version="0.2.0",
+    version="0.2.1",
     description="Command-line tool for downloading PhenoCam data",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

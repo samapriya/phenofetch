@@ -2,7 +2,14 @@
 
 This page documents the version history and notable changes to PhenoFetch.
 
-#### Version 0.2.0 (Current)
+#### Version 0.2.1 (Current)
+
+Released: 2025
+
+- added product check
+- add site check for product availability
+
+#### Version 0.2.0
 
 Released: 2025
 

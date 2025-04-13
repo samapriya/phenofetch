@@ -144,6 +144,37 @@ def valid_output_dir(dir_path):
     else:
         raise argparse.ArgumentTypeError(f"'{dir_path}' exists but is not a directory")
 
+def validate_product_site_combo(site_code, product_id):
+    """
+    Check if the product is available at the specified site code using NEON API.
+    Normalizes the product ID and checks site presence.
+    """
+    # Normalize the product ID
+    if product_id.count(".") == 1:
+        product_id += ".001"
+
+    allowed_products = {"DP1.00033.001", "DP1.20002.001", "DP1.00042.001"}
+    if product_id not in allowed_products:
+        raise argparse.ArgumentTypeError(
+            f"Unsupported product ID: {product_id}. Only DP1.00033(.001), DP1.20002(.001), and DP1.00042(.001) are allowed."
+        )
+
+    try:
+        url = f"https://data.neonscience.org/api/v0/products/{product_id}"
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()
+        site_codes = [item["siteCode"].upper() for item in response.json()["data"]["siteCodes"]]
+    except Exception as e:
+        raise argparse.ArgumentTypeError(
+            f"Could not verify product ID with NEON API: {e}"
+        )
+
+    if site_code.upper() not in site_codes:
+        raise argparse.ArgumentTypeError(
+            f"Site '{site_code}' is not available for product '{product_id}'."
+        )
+
+    return product_id
 
 def print_available_sites():
     """Print a table of all available sites."""
@@ -222,9 +253,8 @@ def main():
     required_stats.add_argument(
         "--product",
         required=True,
-        help="NEON product ID (e.g., DP1.00033)",
+        help="NEON product ID (e.g., DP1.00033/DP1.20002/DP1.00042)",
     )
-
     required_estimate = estimate_parser.add_argument_group("Required arguments")
     required_estimate.add_argument(
         "--site",
@@ -234,7 +264,7 @@ def main():
     required_estimate.add_argument(
         "--product",
         required=True,
-        help="NEON product ID (e.g., DP1.00033)",
+        help="NEON product ID (e.g., DP1.00033/DP1.20002/DP1.00042)",
     )
     required_estimate.add_argument(
         "--start-date",
@@ -277,7 +307,7 @@ def main():
     required_download.add_argument(
         "--product",
         required=True,
-        help="NEON product ID (e.g., DP1.00033)",
+        help="NEON product ID (e.g., DP1.00033/DP1.20002/DP1.00042)",
     )
     required_download.add_argument(
         "--start-date",
@@ -366,6 +396,14 @@ def main():
             print_available_sites()
             return 1
 
+        # Validate and normalize product
+        try:
+            args.product = validate_product_site_combo(args.site, args.product)
+        except argparse.ArgumentTypeError as e:
+            print(f"\n[Error] {e}")
+            return 1
+
+        args.product = args.product.replace(".001", "")
         print(f"\nFetching statistics for site {args.site} (product {args.product})...")
         site_aggregate_stats(args.site, args.product)
         return 0
@@ -377,7 +415,7 @@ def main():
         if start_date > end_date:
             parser.error("Start date must be before or equal to end date")
 
-        # Validate site code before proceeding
+        # Validate site code
         site_data = get_site_data(args.site)
         if site_data is None:
             print(
@@ -385,8 +423,18 @@ def main():
             )
             print_available_sites()
             return 1
+
+        # Validate product-site combo
         try:
-            # Run the size estimation
+            args.product = validate_product_site_combo(args.site, args.product)
+        except argparse.ArgumentTypeError as e:
+            print(f"\n[Error] {e}")
+            return 1
+
+        args.product = args.product.replace(".001", "")
+        print(f"\nEstimating size for site {args.site} (product {args.product})...")
+
+        try:
             fetch_size_estimate(
                 site_code=args.site,
                 product_id=args.product,
@@ -403,6 +451,7 @@ def main():
         except Exception as e:
             print(f"\nError: {str(e)}")
             return 1
+
 
     # New command for metadata processing
     elif args.command == "metadata":
@@ -429,7 +478,7 @@ def main():
         if start_date > end_date:
             parser.error("Start date must be before or equal to end date")
 
-        # Validate site code before proceeding
+        # Validate site code
         site_data = get_site_data(args.site)
         if site_data is None:
             print(
@@ -438,7 +487,14 @@ def main():
             print_available_sites()
             return 1
 
-        # Print configuration summary
+        # Validate product-site combo
+        try:
+            args.product = validate_product_site_combo(args.site, args.product)
+        except argparse.ArgumentTypeError as e:
+            print(f"\n[Error] {e}")
+            return 1
+
+        args.product = args.product.replace(".001", "")
         print(f"\nPhenoFetch Configuration:")
         print(f"  Site code: {args.site}")
         print(f"  Product ID: {args.product}")
@@ -447,9 +503,7 @@ def main():
         if args.download:
             print(f"  Output directory: {args.output_dir}")
             print(f"  Batch size: {args.batch_size}")
-            print(
-                f"  Concurrency: {'Auto' if args.concurrency is None else args.concurrency}"
-            )
+            print(f"  Concurrency: {'Auto' if args.concurrency is None else args.concurrency}")
             print(f"  Timeout: {args.timeout} seconds")
 
         try:
@@ -459,7 +513,6 @@ def main():
             if args.download:
                 try:
                     import colorama
-
                     colorama.init()
                 except ImportError:
                     print(
@@ -467,16 +520,13 @@ def main():
                     )
 
                 os.environ["TQDM_NCOLS"] = "100"
-
-                print(
-                    f"\nFetching links for {site_code} from {args.start_date} to {args.end_date}..."
-                )
+                print(f"\nFetching links for {site_code} from {args.start_date} to {args.end_date}...")
 
                 links = download_links(
                     neon_site_identifier=neon_site_identifier,
                     start_date=args.start_date,
                     end_date=args.end_date,
-                    summary=True,  # Show summary
+                    summary=True,
                     file_types="all",
                 )
 
@@ -491,16 +541,12 @@ def main():
                             timeout=args.timeout,
                         )
 
-                        # Print final summary with clean formatting
+                        # Final summary
                         if result:
                             print("\nDownload Complete!")
                             print(f"Total files processed: {result.get('total', 0)}")
-                            print(
-                                f"Successfully downloaded: {result.get('successful', 0)}"
-                            )
-                            print(
-                                f"Already existed: {result.get('already_existed', 0)}"
-                            )
+                            print(f"Successfully downloaded: {result.get('successful', 0)}")
+                            print(f"Already existed: {result.get('already_existed', 0)}")
                             print(f"Failed: {result.get('failed', 0)}")
                     except Exception as e:
                         print(f"\nError during download: {str(e)}")
@@ -517,19 +563,16 @@ def main():
                 )
 
             return 0
+
         except KeyboardInterrupt:
             print("\nOperation cancelled by user")
             return 130
         except TypeError as e:
             if "object of type 'NoneType' has no len()" in str(e):
-                print(
-                    "\nError: No files found to download, or there was an issue retrieving the file list."
-                )
+                print("\nError: No files found to download, or there was an issue retrieving the file list.")
                 return 1
             elif "cannot unpack non-iterable NoneType object" in str(e):
-                print(
-                    f"\nError: Site code '{args.site}' not found in available sites. Please check the site code and try again."
-                )
+                print(f"\nError: Site code '{args.site}' not found in available sites. Please check the site code and try again.")
                 return 1
             else:
                 print(f"\nType Error: {str(e)}")
@@ -537,6 +580,7 @@ def main():
         except Exception as e:
             print(f"\nError: {str(e)}")
             return 1
+
 
 
 if __name__ == "__main__":
